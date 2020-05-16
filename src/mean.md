@@ -17,5 +17,7 @@ api.addClass("red");
 addClass("red").addClass("blue").addClass("green");
 
 obj.fn(p1)  函数里的 this 就是 obj
+
 obj.fn.call(obj.p1)
+
 ```
