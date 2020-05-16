@@ -129,10 +129,22 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 window.$ = window.jQuery = function (selectorOrTemplate) {
   var elements;
 
-  if (typeof selectorOrTemplate === "string") {
-    elements = document.querySelectorAll(selectorOrTemplate);
-  } else if (elements instanceof Array) {
-    elements = selectorOrTemplate;
+  if (typeof selectorOrArrayOrTemplate === "string") {
+    if (selectorOrArrayOrTemplate[0] === "<") {
+      // 创建 div
+      elements = [createElement(selectorOrArrayOrTemplate)];
+    } else {
+      // 查找 div
+      elements = document.querySelectorAll(selectorOrArrayOrTemplate);
+    }
+  } else if (selectorOrArrayOrTemplate instanceof Array) {
+    elements = selectorOrArrayOrTemplate;
+  }
+
+  function createElement(string) {
+    var container = document.createElement("template");
+    container.innerHTML = string.trim();
+    return container.content.firstChild;
   } // api 可以操作elements
 
 
@@ -153,7 +165,33 @@ jQuery.fn = jQuery.prototype = {
   constructor: jQuery,
   //获取元素
   get: function get(index) {
-    return this.elements(index);
+    return this.elements[index];
+  },
+  appendTo: function appendTo(node) {
+    if (node instanceof Element) {
+      this.each(function (el) {
+        return node.appendChild(el);
+      });
+    } else if (node.jquery === true) {
+      this.each(function (el) {
+        return node.get(0).appendChild(el);
+      });
+    }
+  },
+  append: function append(children) {
+    var _this = this;
+
+    if (children instanceof Element) {
+      this.get(0).appendChild(children);
+    } else if (children instanceof HTMLCollection) {
+      for (var i = 0; i < children.length; i++) {
+        this.get(0).appendChild(children[i]);
+      }
+    } else if (children.jquery === true) {
+      children.each(function (node) {
+        return _this.get(0).appendChild(node);
+      });
+    }
   },
   //查找元素
   find: function find(selector) {
